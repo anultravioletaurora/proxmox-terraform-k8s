@@ -1,15 +1,15 @@
 resource "proxmox_virtual_environment_vm" "k3s_cp_01" {
-  name        = "k8s-cp-01"
+  name        = "${var.machine_name}-01"
   description = "Managed by Terraform"
   tags        = ["terraform"]
   node_name   = "<your proxmox node>"
 
   cpu {
-    cores = 2
+    cores = var.cp_cores
   }
 
   memory {
-    dedicated = 6144
+    dedicated = var.cp_memory
   }
 
   agent {
@@ -24,7 +24,7 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_01" {
     datastore_id = "local-lvm"
     file_id      = proxmox_virtual_environment_file.debian_cloud_image.id
     interface    = "scsi0"
-    size         = 32
+    size         = var.cp_disk_size
   }
 
   serial_device {} # The Debian cloud image expects a serial port to be present
@@ -59,17 +59,17 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_01" {
 }
 
 resource "proxmox_virtual_environment_vm" "k3s_cp_02" {
-  name        = "k8s-cp-01"
+  name        = "${var.machine_name}-02"
   description = "Managed by Terraform"
   tags        = ["terraform"]
   node_name   = "<your proxmox node>"
 
   cpu {
-    cores = 2
+    cores = var.cp_cores
   }
 
   memory {
-    dedicated = 6144
+    dedicated = var.cp_memory
   }
 
   agent {
@@ -84,7 +84,7 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_02" {
     datastore_id = "local-lvm"
     file_id      = proxmox_virtual_environment_file.debian_cloud_image.id
     interface    = "scsi0"
-    size         = 32
+    size         = var.cp_disk_size
   }
 
   serial_device {} # The Debian cloud image expects a serial port to be present
@@ -119,18 +119,18 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_02" {
   }
 }
 
-resource "proxmox_virtual_environment_vm" "k8s_worker_01" {
-  name        = "k8s-worker-01"
+resource "proxmox_virtual_environment_vm" "k3s_worker_01" {
+  name        = "${var.machine_name}-worker-01"
   description = "Managed by Terraform"
   tags        = ["terraform"]
   node_name   = "<your proxmox node>"
 
   cpu {
-    cores = 1
+    cores = var.worker_cores
   }
 
   memory {
-    dedicated = 2048
+    dedicated = var.worker_memory
   }
 
   agent {
@@ -145,7 +145,7 @@ resource "proxmox_virtual_environment_vm" "k8s_worker_01" {
     datastore_id = "local-lvm"
     file_id      = proxmox_virtual_environment_file.debian_cloud_image.id
     interface    = "scsi0"
-    size         = 32
+    size         = var.worker_disk_size
   }
 
   serial_device {} # The Debian cloud image expects a serial port to be present
