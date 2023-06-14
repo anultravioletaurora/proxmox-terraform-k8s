@@ -49,10 +49,11 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_01" {
     command = <<EOT
             k3sup install \
             --ip ${self.network_interface[0].access_config[0].nat_ip} \
-            --cluster
+            --cluster \
             --context k3s \
             --ssh-key ~/.ssh/id_rsa.pub \
             --user ${var.username} \
+            --k3s-version ${var.k3s_version}
             # --k3s-extra-args '--no-deploy -traefik'
         EOT
   }
@@ -109,11 +110,12 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_02" {
     command = <<EOT
             k3sup install \
             --ip ${self.network_interface[0].access_config[0].nat_ip} \
-            --server
+            --server \
             --server-ip ${proxmox_virtual_environment_vm.k3s_cp_01.network_interface[0].access_config[0].nat_ip} \
             --context k3s \
             --ssh-key ~/.ssh/id_rsa.pub \
             --user ${var.username} \
+            --k3s-version ${var.k3s_version}
             # --k3s-extra-args '--no-deploy -traefik'
         EOT
   }
@@ -176,7 +178,8 @@ resource "proxmox_virtual_environment_vm" "k3s_workers" {
             --ip ${self.network_interface[0].access_config[0].nat_ip} \
             --server-ip ${proxmox_virtual_environment_vm.k3s_cp_01.network_interface[0].access_config[0].nat_ip} \
             --ssh-key ~/.ssh/id_rsa.pub \
-            --user var.username
+            --user var.username \
+            --k3s-version ${var.k3s_version}
         EOT
   }
 }
