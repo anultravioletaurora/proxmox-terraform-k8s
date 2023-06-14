@@ -1,7 +1,7 @@
 # proxmox-terraform-k8s
 Terraform project for spinning up a k8s cluster on Proxmox
 
-### Uses
+### Uses:
 - https://github.com/bpg/terraform-provider-proxmox
 - https://github.com/alexellis/k3sup
 
