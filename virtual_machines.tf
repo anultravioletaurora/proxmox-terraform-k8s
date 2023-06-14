@@ -34,6 +34,10 @@ resource "proxmox_virtual_environment_vm" "k8s_cp_01" {
   }
 
   initialization {
+    
+    datastore_id      = "local-lvm"
+    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
+    
     ip_config {
       ipv4 {
         address = "dhcp"
@@ -78,6 +82,10 @@ resource "proxmox_virtual_environment_vm" "k8s_worker_01" {
   }
 
   initialization {
+    
+    datastore_id      = "local-lvm"
+    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
+
     ip_config {
       ipv4 {
         address = "dhcp"
