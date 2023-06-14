@@ -119,8 +119,12 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_02" {
   }
 }
 
-resource "proxmox_virtual_environment_vm" "k3s_worker_01" {
-  name        = "${var.machine_name}-worker-01"
+resource "proxmox_virtual_environment_vm" "k3s_workers" {
+  
+  # Number of workers to create, defined in variables.tf
+  count       = var.worker_count
+  
+  name        = "${var.machine_name}-worker-${count.index + 1}"
   description = "Managed by Terraform"
   tags        = ["terraform"]
   node_name   = "<your proxmox node>"
