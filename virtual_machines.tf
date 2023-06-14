@@ -1,14 +1,3 @@
-# Variables
-variable "machine_name" {
-  type = string
-}
-
-variable "username" {
-  type = string 
-}
-
-# End Variables
-
 resource "proxmox_virtual_environment_vm" "k3s_cp_01" {
   name        = "k8s-cp-01"
   description = "Managed by Terraform"
