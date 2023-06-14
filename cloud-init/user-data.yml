@@ -2,8 +2,9 @@
 package_upgrade: true
 packages:
   - qemu-guest-agent
+  - nfs-common
 
-timezone: Europe/Oslo
+timezone: America/Chicago
 users:
   - name: <your username>
     passwd: <your password hash>
