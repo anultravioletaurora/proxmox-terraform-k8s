@@ -4,9 +4,9 @@ resource "proxmox_virtual_environment_file" "debian_cloud_image" {
   node_name    = "<your proxmox node>"
 
   source_file {
-    path      = "https://cdimage.debian.org/images/cloud/bullseye/20221219-1234/debian-11-genericcloud-amd64-20221219-1234.qcow2"
-    file_name = "debian-11-genericcloud-amd64-20221219-1234.img"
-    checksum  = "ba0237232247948abf7341a495dec009702809aa7782355a1b35c112e75cee81"
+    path      = "https://cloud.debian.org/images/cloud/bookworm/20230612-1409/debian-12-genericcloud-arm64-20230612-1409.qcow2"
+    file_name = "debian-12-genericcloud-arm64-20230612-1409.qcow2"
+    checksum  = "61358292dbec302446a272d5011019091ca78e3fe8878b2d67d31b32e0661306c53a72f793f109394daf937a3db7b2db34422d504e07fdbb300a7bf87109fcf1"
   }
 }
 
