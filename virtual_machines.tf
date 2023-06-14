@@ -1,4 +1,15 @@
-resource "proxmox_virtual_environment_vm" "k8s_cp_01" {
+# Variables
+variable "machine_name" {
+  type = string
+}
+
+variable "username" {
+  type = string 
+}
+
+# End Variables
+
+resource "proxmox_virtual_environment_vm" "k3s_cp_01" {
   name        = "k8s-cp-01"
   description = "Managed by Terraform"
   tags        = ["terraform"]
@@ -21,7 +32,7 @@ resource "proxmox_virtual_environment_vm" "k8s_cp_01" {
   }
 
   disk {
-    datastore_id = "local-zfs"
+    datastore_id = "local-lvm"
     file_id      = proxmox_virtual_environment_file.debian_cloud_image.id
     interface    = "scsi0"
     size         = 32
@@ -58,7 +69,7 @@ resource "proxmox_virtual_environment_vm" "k8s_cp_01" {
   }
 }
 
-resource "proxmox_virtual_environment_vm" "k8s_cp_01" {
+resource "proxmox_virtual_environment_vm" "k3s_cp_02" {
   name        = "k8s-cp-01"
   description = "Managed by Terraform"
   tags        = ["terraform"]
@@ -81,7 +92,7 @@ resource "proxmox_virtual_environment_vm" "k8s_cp_01" {
   }
 
   disk {
-    datastore_id = "local-zfs"
+    datastore_id = "local-lvm"
     file_id      = proxmox_virtual_environment_file.debian_cloud_image.id
     interface    = "scsi0"
     size         = 32
@@ -110,10 +121,10 @@ resource "proxmox_virtual_environment_vm" "k8s_cp_01" {
             k3sup install \
             --ip ${self.network_interface[0].access_config[0].nat_ip} \
             --server
-            --server-ip ${google_compute_instance.k3s_master_instance.network_interface[0].access_config[0].nat_ip} \
+            --server-ip ${proxmox_virtual_environment_vm.k3s_cp_01.network_interface[0].access_config[0].nat_ip} \
             --context k3s \
             --ssh-key ~/.ssh/google_compute_engine \
-            --user $(whoami) \
+            --user var.username \
             # --k3s-extra-args '--no-deploy -traefik'
         EOT
   }
@@ -142,7 +153,7 @@ resource "proxmox_virtual_environment_vm" "k8s_worker_01" {
   }
 
   disk {
-    datastore_id = "local-zfs"
+    datastore_id = "local-lvm"
     file_id      = proxmox_virtual_environment_file.debian_cloud_image.id
     interface    = "scsi0"
     size         = 32
@@ -170,9 +181,9 @@ resource "proxmox_virtual_environment_vm" "k8s_worker_01" {
     command = <<EOT
             k3sup join \
             --ip ${self.network_interface[0].access_config[0].nat_ip} \
-            --server-ip ${google_compute_instance.k3s_master_instance.network_interface[0].access_config[0].nat_ip} \
-            --ssh-key ~/.ssh/google_compute_engine \
-            --user $(whoami)
+            --server-ip ${proxmox_virtual_environment_vm.k3s_cp_01.network_interface[0].access_config[0].nat_ip} \
+            --ssh-key ~/.ssh/id_rsa.pub \
+            --user var.username
         EOT
   }
 }
