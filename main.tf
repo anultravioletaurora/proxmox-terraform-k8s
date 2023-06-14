@@ -9,6 +9,6 @@ terraform {
 
 provider "proxmox" {
   virtual_environment {
-    endpoint = "https://<your proxmox ip>:8006/"
+    endpoint = "https://${var.proxmox_api_ip}:8006/"
   }
 }
