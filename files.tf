@@ -9,3 +9,13 @@ resource "proxmox_virtual_environment_file" "debian_cloud_image" {
     checksum  = "ba0237232247948abf7341a495dec009702809aa7782355a1b35c112e75cee81"
   }
 }
+
+resource "proxmox_virtual_environment_file" "cloud_config" {
+  content_type = "snippets"
+  datastore_id = "local"
+  node_name    = "<your proxmox node>"
+
+  source_file {
+    path = "cloud-init/user-data.yml"
+  }
+}
