@@ -51,8 +51,8 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_01" {
             --ip ${self.network_interface[0].access_config[0].nat_ip} \
             --cluster
             --context k3s \
-            --ssh-key ~/.ssh/google_compute_engine \
-            --user $(whoami) \
+            --ssh-key ~/.ssh/id_rsa.pub \
+            --user ${var.username} \
             # --k3s-extra-args '--no-deploy -traefik'
         EOT
   }
@@ -112,8 +112,8 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_02" {
             --server
             --server-ip ${proxmox_virtual_environment_vm.k3s_cp_01.network_interface[0].access_config[0].nat_ip} \
             --context k3s \
-            --ssh-key ~/.ssh/google_compute_engine \
-            --user var.username \
+            --ssh-key ~/.ssh/id_rsa.pub \
+            --user ${var.username} \
             # --k3s-extra-args '--no-deploy -traefik'
         EOT
   }
