@@ -16,6 +16,12 @@ variable "cp_disk_size" {
   default = 40
 }
 
+variable "k3s_version" {
+  type = string
+  description = "The k3s version to install across the cluster"
+  default = "v1.27.2+k3s1"
+}
+
 variable "machine_name" {
   type = string
   description = "The name of the machines in the cluster, will be used when naming nodes"
