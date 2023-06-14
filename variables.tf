@@ -28,6 +28,11 @@ variable "machine_name" {
   default = "k3s"
 }
 
+variable "proxmox_api_ip" {
+  type = string
+  description = "The IP of the API for the Proxmox cluster"
+}
+
 variable "username" {
   type = string 
   description = "The SSH username"
