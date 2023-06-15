@@ -1,3 +1,8 @@
+# Variables
+server_ip: "10.10.88.101"
+username: "yuri"
+context: "k3s"
+
 #cloud-config
 package_upgrade: true
 packages:
@@ -21,3 +26,7 @@ power_state:
     mode: reboot
     message: Rebooting after cloud-init completion
     condition: true
+
+# Perform k3s install on first boot
+runcmd:
+  - k3sup install --ip ${server_ip} --cluster --context ${k3s} --ssh-key ~/.ssh/id_rsa --user ${username}
