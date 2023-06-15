@@ -1,8 +1,3 @@
-# Requires:
-# - server_ip
-# - context
-# - username
-
 #cloud-config
 package_upgrade: true
 packages:
@@ -12,21 +7,16 @@ packages:
 
 timezone: America/Chicago
 users:
-  - name: <your username>
-    passwd: <your password hash>
+  - name: ${username}
     groups: [adm, cdrom, dip, plugdev, lxd, sudo]
     lock-passwd: false
     sudo: ALL=(ALL) NOPASSWD:ALL
     shell: /bin/bash
     ssh_authorized_keys:
-      - <your ssh public key>
+      - ${ssh_key}
 
 power_state:
     delay: now
     mode: reboot
     message: Rebooting after cloud-init completion
     condition: true
-
-# Perform k3s install on first boot
-runcmd:
-  - k3sup install --ip ${server_ip} --cluster --context ${k3s} --ssh-key ~/.ssh/id_rsa --user ${username}

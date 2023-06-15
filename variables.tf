@@ -1,3 +1,9 @@
+variable "additional_control_plane_count" {
+  type = number
+  description = "The number of additional control plane server nodes to create"
+  default = 0
+}
+
 variable "cp_cores" {
   type = number
   description = "The number of cores for the control plane machine(s)"
@@ -22,9 +28,9 @@ variable "k3s_version" {
   default = "v1.27.2+k3s1"
 }
 
-variable "machine_name" {
+variable "cluster_name" {
   type = string
-  description = "The name of the machines in the cluster, will be used when naming nodes"
+  description = "The name of the k3s cluster, will be used when naming nodes and setting the k3s context"
   default = "k3s"
 }
 

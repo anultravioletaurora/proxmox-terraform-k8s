@@ -1,8 +1,10 @@
+data "proxmox_virtual_environment_nodes" "available_nodes" {}
+
 resource "proxmox_virtual_environment_vm" "k3s_cp_01" {
-  name        = "${var.machine_name}-01"
-  description = "Managed by Terraform"
-  tags        = ["terraform"]
-  node_name   = var.proxmox_node
+  name        = "${var.cluster_name}-01"
+  description = "Control plane server in the ${var.cluster_name} k3s cluster and managed by Terraform. Created on ${formatdate("MMM DD, YYYY")} at ${formatdate("H:mm:ss AA")}"
+  tags        = ["k3s", "terraform"]
+  node_name   = proxmox_virtual_environment_nodes.available_nodes[0]
 
   cpu {
     cores = var.cp_cores
@@ -46,29 +48,36 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_01" {
       }
     }
   }
-  
-  provisioner "local-exec" {
-    command = <<EOT
-            k3sup install \
-            --ip $IP_ADDRESS \
-            --cluster \
-            --context k3s \
-            --ssh-key ~/.ssh/id_rsa \
-            --user ${var.username} \
-            --k3s-version ${var.k3s_version}
-        EOT
+}
 
-    environment = {
-      IP_ADDRESS = "${self.ipv4_addresses[1][0]}"
-    }
+# Run a provisioner locally after the first CP node has been created
+# This will create the cluster and allow the other nodes to join it
+resource "null_resource" "k3sup_cp_01_provisioner" {
+
+  provisioner "local-exec" {
+    command = "k3sup install --ip=${proxmox_virtual_environment_vm.k3s_cp_01.network_interface.0.ip_address} --user=${var.username} --ssh-key=~/.ssh/id_rsa"
   }
+
+  # We can only execute this after the cp finishes getting built
+  depends_on = [
+    proxmox_virtual_environment_vm.k3s_cp_01,
+  ]
 }
 
 resource "proxmox_virtual_environment_vm" "k3s_cp_02" {
-  name        = "${var.machine_name}-02"
-  description = "Managed by Terraform"
-  tags        = ["terraform"]
-  node_name   = var.proxmox_node
+
+  # Number of additional control plane servers to create - enabling HA
+  # Defined in variables.tf
+  count       = var.additional_control_plane_count
+
+
+
+  name        = "${var.cluster_name}-0${count.index + 1}" # TODO: Make this pad the number automatically
+  description = "Additional control plane server in the ${var.cluster_name} k3s cluster and managed by Terraform. Created on ${formatdate("MMM DD, YYYY")} at ${formatdate("H:mm:ss AA")}"
+  tags        = ["k3s", "terraform"]
+
+  # Balances the machines across all nodes
+  node_name   = proxmox_virtual_environment_nodes.available_nodes[(count - 1) % length(proxmox_virtual_environment_nodes.available_nodes) + count.index]
 
   cpu {
     cores = var.cp_cores
@@ -112,34 +121,20 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_02" {
       }
     }
   }
-  
-  provisioner "local-exec" {
-    command = <<EOT
-            k3sup install \
-            --ip $IP_ADDRESS \
-            --server \
-            --server-ip ${proxmox_virtual_environment_vm.k3s_cp_01.ipv4_addresses[1][0]} \
-            --context k3s \
-            --ssh-key ~/.ssh/id_rsa \
-            --user ${var.username} \
-            --k3s-version ${var.k3s_version}
-        EOT
-
-    environment = {
-      IP_ADDRESS = self.ipv4_addresses[1][0]
-    }
-  }
 }
 
 resource "proxmox_virtual_environment_vm" "k3s_workers" {
   
-  # Number of workers to create, defined in variables.tf
+  # Number of workers to create
+  # Defined in variables.tf
   count       = var.worker_count
   
-  name        = "${var.machine_name}-worker-0${count.index + 1}"
-  description = "Managed by Terraform"
-  tags        = ["terraform"]
-  node_name   = var.proxmox_node
+  name        = "${var.cluster_name}-worker-0${count.index + 1}" # TODO: Pad this number correctly
+  description = "Node in the ${var.cluster_name} k3s cluster and managed by Terraform. Created on ${formatdate("MMM DD, YYYY")} at ${formatdate("H:mm:ss AA")}"
+  tags        = ["k3s", "terraform"]
+
+  # Balances workers across all nodes
+  node_name   = proxmox_virtual_environment_nodes.available_nodes[(count - 1) % length(proxmox_virtual_environment_nodes.available_nodes) + count.index]
 
   cpu {
     cores = var.worker_cores
@@ -181,21 +176,6 @@ resource "proxmox_virtual_environment_vm" "k3s_workers" {
       ipv4 {
         address = "dhcp"
       }
-    }
-  }
-  
-  provisioner "local-exec" {
-    command = <<EOT
-            k3sup join \
-            --ip $IP_ADDRESS \
-            --server-ip ${proxmox_virtual_environment_vm.k3s_cp_01.ipv4_addresses[1][0]} \
-            --ssh-key ~/.ssh/id_rsa \
-            --user var.username \
-            --k3s-version ${var.k3s_version}
-        EOT
-
-    environment = {
-      IP_ADDRESS = self.ipv4_addresses[1][0]
     }
   }
 }

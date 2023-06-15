@@ -9,12 +9,16 @@ resource "proxmox_virtual_environment_file" "debian_cloud_image" {
   }
 }
 
+# Creates a cloud init drive on all nodes
 resource "proxmox_virtual_environment_file" "cloud_config" {
+
+  count = length(proxmox_virtual_environment_nodes.available_nodes)
+
   content_type = "snippets"
   datastore_id = "local"
-  node_name    = var.proxmox_node
+  node_name    = proxmox_virtual_environment_nodes.available_nodes[count.index]
 
-  source_file {
-    path = "cloud-init/user-data.yml"
+  source_raw {
+    data = templatefile("${path.module}/cloud-init/config.tftpl", { username = var.username, ssh_key = file("~/.ssh/id_rsa.pub")})
   }
 }
