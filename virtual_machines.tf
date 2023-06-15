@@ -55,7 +55,7 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_01" {
 resource "null_resource" "k3sup_cp_01_provisioner" {
 
   provisioner "local-exec" {
-    command = "k3sup install --ip=${proxmox_virtual_environment_vm.k3s_cp_01.network_interface.0.ip_address} --user=${var.username} --ssh-key=~/.ssh/id_rsa"
+    command = "k3sup install --ip ${proxmox_virtual_environment_vm.k3s_cp_01.network_interface.0.ip_address} --user ${var.username} --ssh-key ~/.ssh/id_rsa"
   }
 
   # We can only execute this after the cp finishes getting built
@@ -123,6 +123,22 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_02" {
   }
 }
 
+# Run a provisioner locally after the additional servers have been created
+# This will join them all to the cluster
+resource "null_resource" "k3sup_cp_02_provisioner" {
+
+  count = var.additional_control_plane_count
+
+  provisioner "local-exec" {
+    command = "k3sup install --ip ${proxmox_virtual_environment_vm.k3s_cp_02[count.index].network_interface.0.ip_address} --server --server-ip ${proxmox_virtual_environment_vm.k3s_cp_01.network_interface.0.ip_address} --user ${var.username} --ssh-key ~/.ssh/id_rsa.pub"
+  }
+
+  # We can only execute this after the cp finishes getting built
+  depends_on = [
+    proxmox_virtual_environment_vm.k3s_cp_01,
+  ]
+}
+
 resource "proxmox_virtual_environment_vm" "k3s_workers" {
   
   # Number of workers to create
@@ -178,4 +194,20 @@ resource "proxmox_virtual_environment_vm" "k3s_workers" {
       }
     }
   }
+}
+
+# Run a provisioner locally after the workers have been created
+# This will join them all to the cluster
+resource "null_resource" "k3sup_cp_02_provisioner" {
+
+  count = var.worker_count
+
+  provisioner "local-exec" {
+    command = "k3sup install --ip ${proxmox_virtual_environment_vm.k3s_workers[count.index].network_interface.0.ip_address} --server-ip ${proxmox_virtual_environment_vm.k3s_cp_01.network_interface.0.ip_address} --user ${var.username} --ssh-key ~/.ssh/id_rsa.pub"
+  }
+
+  # We can only execute this after the cp finishes getting built
+  depends_on = [
+    proxmox_virtual_environment_vm.k3s_workers,
+  ]
 }
