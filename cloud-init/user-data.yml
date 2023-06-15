@@ -3,6 +3,7 @@ package_upgrade: true
 packages:
   - qemu-guest-agent
   - nfs-common
+  - linux-modules-extra-5.15.0-1034-generic
 
 timezone: America/Chicago
 users:
