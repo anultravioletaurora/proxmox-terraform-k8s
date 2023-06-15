@@ -8,5 +8,6 @@ This will spin up multiple control plane servers in an embedded DB HA mode, and 
 - https://github.com/alexellis/k3sup
 
 ### Resources
+- https://cloudinit.readthedocs.io/en/latest/index.html
 - https://olav.ninja/deploying-kubernetes-cluster-on-proxmox-part-1
 - https://nimblehq.co/blog/provision-k3s-on-google-cloud-with-terraform-and-k3sup#terraform-apply
