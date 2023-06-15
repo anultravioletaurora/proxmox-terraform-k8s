@@ -10,5 +10,8 @@ terraform {
 provider "proxmox" {
   virtual_environment {
     endpoint = "https://${var.proxmox_api_ip}:8006/"
+    username = var.proxmox_username
+    password = var.proxmox_password
+    insecure = true
   }
 }

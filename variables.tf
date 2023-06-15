@@ -33,6 +33,21 @@ variable "proxmox_api_ip" {
   description = "The IP of the API for the Proxmox cluster"
 }
 
+variable "proxmox_node" {
+  type = string
+  description = "The node of the Proxmox cluster to deploy to"
+}
+
+variable "proxmox_username" {
+  type = string
+  description = "The username of the Proxmox user"
+}
+
+variable "proxmox_password" {
+  type = string
+  description = "The password of the Proxmox user"
+}
+
 variable "username" {
   type = string 
   description = "The SSH username"
@@ -42,6 +57,12 @@ variable "worker_cores" {
   type = number
   description = "The number of cores for the worker machine(s)"
   default = 2
+}
+
+variable "worker_count" {
+  type = number
+  description = "The number of workers to create"
+  default = 1
 }
 
 variable "worker_memory" {

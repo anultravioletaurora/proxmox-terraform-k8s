@@ -2,7 +2,7 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_01" {
   name        = "${var.machine_name}-01"
   description = "Managed by Terraform"
   tags        = ["terraform"]
-  node_name   = "<your proxmox node>"
+  node_name   = var.proxmox_node
 
   cpu {
     cores = var.cp_cores
@@ -18,6 +18,8 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_01" {
 
   network_device {
     bridge = "vmbr0"
+    mac_address = "AA:BB:57:FA:6A:DF"
+    vlan_id = 88
   }
 
   disk {
@@ -48,14 +50,17 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_01" {
   provisioner "local-exec" {
     command = <<EOT
             k3sup install \
-            --ip ${self.network_interface[0].access_config[0].nat_ip} \
+            --ip $IP_ADDRESS \
             --cluster \
             --context k3s \
-            --ssh-key ~/.ssh/id_rsa.pub \
+            --ssh-key ~/.ssh/id_rsa \
             --user ${var.username} \
             --k3s-version ${var.k3s_version}
-            # --k3s-extra-args '--no-deploy -traefik'
         EOT
+
+    environment = {
+      IP_ADDRESS = "${self.ipv4_addresses[1][0]}"
+    }
   }
 }
 
@@ -63,7 +68,7 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_02" {
   name        = "${var.machine_name}-02"
   description = "Managed by Terraform"
   tags        = ["terraform"]
-  node_name   = "<your proxmox node>"
+  node_name   = var.proxmox_node
 
   cpu {
     cores = var.cp_cores
@@ -79,6 +84,8 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_02" {
 
   network_device {
     bridge = "vmbr0"
+    mac_address = "BE:C7:6E:0E:40:C1"
+    vlan_id = 88
   }
 
   disk {
@@ -109,15 +116,18 @@ resource "proxmox_virtual_environment_vm" "k3s_cp_02" {
   provisioner "local-exec" {
     command = <<EOT
             k3sup install \
-            --ip ${self.network_interface[0].access_config[0].nat_ip} \
+            --ip $IP_ADDRESS \
             --server \
-            --server-ip ${proxmox_virtual_environment_vm.k3s_cp_01.network_interface[0].access_config[0].nat_ip} \
+            --server-ip ${proxmox_virtual_environment_vm.k3s_cp_01.ipv4_addresses[1][0]} \
             --context k3s \
-            --ssh-key ~/.ssh/id_rsa.pub \
+            --ssh-key ~/.ssh/id_rsa \
             --user ${var.username} \
             --k3s-version ${var.k3s_version}
-            # --k3s-extra-args '--no-deploy -traefik'
         EOT
+
+    environment = {
+      IP_ADDRESS = self.ipv4_addresses[1][0]
+    }
   }
 }
 
@@ -126,10 +136,10 @@ resource "proxmox_virtual_environment_vm" "k3s_workers" {
   # Number of workers to create, defined in variables.tf
   count       = var.worker_count
   
-  name        = "${var.machine_name}-worker-${count.index + 1}"
+  name        = "${var.machine_name}-worker-0${count.index + 1}"
   description = "Managed by Terraform"
   tags        = ["terraform"]
-  node_name   = "<your proxmox node>"
+  node_name   = var.proxmox_node
 
   cpu {
     cores = var.worker_cores
@@ -145,6 +155,8 @@ resource "proxmox_virtual_environment_vm" "k3s_workers" {
 
   network_device {
     bridge = "vmbr0"
+    mac_address = "62:7B:20:3C:B3:53"
+    vlan_id = 88
   }
 
   disk {
@@ -175,11 +187,15 @@ resource "proxmox_virtual_environment_vm" "k3s_workers" {
   provisioner "local-exec" {
     command = <<EOT
             k3sup join \
-            --ip ${self.network_interface[0].access_config[0].nat_ip} \
-            --server-ip ${proxmox_virtual_environment_vm.k3s_cp_01.network_interface[0].access_config[0].nat_ip} \
-            --ssh-key ~/.ssh/id_rsa.pub \
+            --ip $IP_ADDRESS \
+            --server-ip ${proxmox_virtual_environment_vm.k3s_cp_01.ipv4_addresses[1][0]} \
+            --ssh-key ~/.ssh/id_rsa \
             --user var.username \
             --k3s-version ${var.k3s_version}
         EOT
+
+    environment = {
+      IP_ADDRESS = self.ipv4_addresses[1][0]
+    }
   }
 }
