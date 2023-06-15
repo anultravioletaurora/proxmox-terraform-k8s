@@ -1,7 +1,9 @@
 # proxmox-terraform-k8s
 Terraform project for spinning up a k8s cluster on Proxmox
 
-This will spin up multiple control plane servers in an embedded DB HA mode, and will create as many worker nodes as you like. 
+This will spin up multiple control plane servers in an embedded DB HA mode, and will create as many worker nodes as you like.
+
+⚠ I'm still working on this so please don't consider this project in working order lol
 
 ### Uses:
 - https://github.com/bpg/terraform-provider-proxmox
